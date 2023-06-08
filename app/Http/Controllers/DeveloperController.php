@@ -13,7 +13,7 @@ class DeveloperController extends Controller
      */
     public function index()
     {
-        $developers = Developer::latest()->get();
+        $developers = Developer::withCount('projects')->latest()->get();
 
         return response()->json([
             'data' => $developers,
@@ -54,6 +54,11 @@ class DeveloperController extends Controller
 
         $developer->save();
 
+        if ($request->has('project_ids')) {
+            $project_ids = explode(',', $request->project_ids);
+            $developer->projects()->sync($project_ids);
+        }
+
         return response()->json([
             'message' => 'Developer created successfully',
             'data' => $developer,
@@ -65,6 +70,8 @@ class DeveloperController extends Controller
      */
     public function show(Developer $developer)
     {
+        $developer->load('projects');
+
         return response()->json([
             'data' => $developer,
         ], 200);
@@ -79,7 +86,7 @@ class DeveloperController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
             'designation' => 'required|string',
-            'email' => 'required|email|unique:developers,email,' . $developer->email,
+            'email' => 'required|email|unique:developers,email,' . $developer->id,
             'phone' => 'required|string',
         ]);
 
@@ -103,6 +110,11 @@ class DeveloperController extends Controller
 
         $developer->save();
 
+        if ($request->has('project_ids')) {
+            $project_ids = explode(',', $request->project_ids);
+            $developer->projects()->sync($project_ids);
+        }
+
         return response()->json([
             'message' => 'Developer updated successfully',
             'data' => $developer,
@@ -120,27 +132,4 @@ class DeveloperController extends Controller
             'message' => 'Developer deleted successfully',
         ], 200);
     }
-
-    public function assignProjects(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'developer_id' => 'required|integer',
-            'project_ids' => 'required|array',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => $validator->errors()->first(),
-            ], 422);
-        }
-
-        $developer = Developer::find($request->developer_id);
-        $developer->projects()->sync($request->project_ids);
-
-        return response()->json([
-            'message' => 'Projects assigned successfully',
-            'data' => $developer,
-        ], 200);
-    }
-
 }

@@ -54,6 +54,11 @@ class ProjectController extends Controller
 
         $project->save();
 
+        if ($request->has('developer_ids')) {
+            $developer_ids = explode(',', $request->developer_ids);
+            $project->developers()->sync($developer_ids);
+        }
+
         return response()->json([
             'message' => 'Project created successfully',
             'data' => $project,
@@ -102,6 +107,11 @@ class ProjectController extends Controller
 
         $project->save();
 
+        if ($request->has('developer_ids')) {
+            $developer_ids = explode(',', $request->developer_ids);
+            $project->developers()->sync($developer_ids);
+        }
+
         return response()->json([
             'message' => 'Project updated successfully',
             'data' => $project,
@@ -117,28 +127,6 @@ class ProjectController extends Controller
 
         return response()->json([
             'message' => 'Project deleted successfully',
-        ], 200);
-    }
-
-    public function assignDevelopers(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'project_id' => 'required|integer',
-            'developer_ids' => 'required|array',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => $validator->errors()->first(),
-            ], 422);
-        }
-
-        $project = Project::find($request->project_id);
-        $project->developers()->sync($request->developer_ids);
-
-        return response()->json([
-            'message' => 'Developers assigned successfully',
-            'data' => $project,
         ], 200);
     }
 }

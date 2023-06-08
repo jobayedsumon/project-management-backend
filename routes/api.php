@@ -24,7 +24,5 @@ Route::prefix('auth')->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::resource('developers', DeveloperController::class);
-    Route::post('developers/{developer}/assign-projects', [DeveloperController::class, 'assignProjects']);
     Route::resource('projects', ProjectController::class);
-    Route::post('projects/{project}/assign-developers', [ProjectController::class, 'assignDevelopers']);
 });
