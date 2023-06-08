@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Developer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class DeveloperController extends Controller
 {
@@ -12,23 +13,51 @@ class DeveloperController extends Controller
      */
     public function index()
     {
-        //
+        $developers = Developer::latest()->get();
+
+        return response()->json([
+            'data' => $developers,
+        ], 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string',
+            'designation' => 'required|string',
+            'email' => 'required|email|unique:developers,email',
+            'phone' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => $validator->errors()->first(),
+            ], 422);
+        }
+
+        $developer = new Developer();
+        $developer->name = $request->name;
+        $developer->designation = $request->designation;
+        $developer->email = $request->email;
+        $developer->phone = $request->phone;
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $image->storeAs('public/developers', $imageName);
+            $developer->image = $imageName;
+        }
+
+        $developer->save();
+
+        return response()->json([
+            'message' => 'Developer created successfully',
+            'data' => $developer,
+        ], 201);
     }
 
     /**
@@ -36,23 +65,48 @@ class DeveloperController extends Controller
      */
     public function show(Developer $developer)
     {
-        //
+        return response()->json([
+            'data' => $developer,
+        ], 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Developer $developer)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, Developer $developer)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string',
+            'designation' => 'required|string',
+            'email' => 'required|email|unique:developers,email,' . $developer->email,
+            'phone' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => $validator->errors()->first(),
+            ], 422);
+        }
+
+        $developer->name = $request->name;
+        $developer->designation = $request->designation;
+        $developer->email = $request->email;
+        $developer->phone = $request->phone;
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $image->storeAs('public/developers', $imageName);
+            $developer->image = $imageName;
+        }
+
+        $developer->save();
+
+        return response()->json([
+            'message' => 'Developer updated successfully',
+            'data' => $developer,
+        ], 200);
     }
 
     /**
@@ -60,6 +114,33 @@ class DeveloperController extends Controller
      */
     public function destroy(Developer $developer)
     {
-        //
+        $developer->delete();
+
+        return response()->json([
+            'message' => 'Developer deleted successfully',
+        ], 200);
     }
+
+    public function assignProjects(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'developer_id' => 'required|integer',
+            'project_ids' => 'required|array',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => $validator->errors()->first(),
+            ], 422);
+        }
+
+        $developer = Developer::find($request->developer_id);
+        $developer->projects()->sync($request->project_ids);
+
+        return response()->json([
+            'message' => 'Projects assigned successfully',
+            'data' => $developer,
+        ], 200);
+    }
+
 }
