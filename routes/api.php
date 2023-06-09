@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeveloperController;
 use App\Http\Controllers\ProjectController;
 use Illuminate\Http\Request;
@@ -25,4 +26,5 @@ Route::prefix('auth')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::resource('developers', DeveloperController::class);
     Route::resource('projects', ProjectController::class);
+    Route::get('dashboard', [DashboardController::class, 'index']);
 });

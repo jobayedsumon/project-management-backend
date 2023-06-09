@@ -13,7 +13,7 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        $projects = Project::latest()->get();
+        $projects = Project::withCount('developers')->latest()->get();
 
         return response()->json([
             'data' => $projects,
@@ -30,7 +30,7 @@ class ProjectController extends Controller
             'name' => 'required|string',
             'description' => 'required|string',
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
+            'end_date' => 'required|date|after_or_equal:start_date',
         ]);
 
         if ($validator->fails()) {
@@ -54,10 +54,8 @@ class ProjectController extends Controller
 
         $project->save();
 
-        if ($request->has('developer_ids')) {
-            $developer_ids = explode(',', $request->developer_ids);
-            $project->developers()->sync($developer_ids);
-        }
+        $developer_ids = $request->developer_ids ? explode(',', $request->developer_ids) : [];
+        $project->developers()->sync($developer_ids);
 
         return response()->json([
             'message' => 'Project created successfully',
@@ -70,6 +68,8 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
+        $project->load('developers');
+
         return response()->json([
             'data' => $project,
         ], 200);
@@ -84,7 +84,7 @@ class ProjectController extends Controller
             'name' => 'required|string',
             'description' => 'required|string',
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
+            'end_date' => 'required|date|after_or_equal:start_date',
         ]);
 
         if ($validator->fails()) {
@@ -107,10 +107,8 @@ class ProjectController extends Controller
 
         $project->save();
 
-        if ($request->has('developer_ids')) {
-            $developer_ids = explode(',', $request->developer_ids);
-            $project->developers()->sync($developer_ids);
-        }
+        $developer_ids = $request->developer_ids ? explode(',', $request->developer_ids) : [];
+        $project->developers()->sync($developer_ids);
 
         return response()->json([
             'message' => 'Project updated successfully',

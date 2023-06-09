@@ -54,13 +54,11 @@ class DeveloperController extends Controller
 
         $developer->save();
 
-        if ($request->has('project_ids')) {
-            $project_ids = explode(',', $request->project_ids);
-            $developer->projects()->sync($project_ids);
-        }
+        $project_ids = $request->project_ids ? explode(',', $request->project_ids) : [];
+        $developer->projects()->sync($project_ids);
 
         return response()->json([
-            'message' => 'Developer created successfully',
+            'message' => 'Developer added successfully',
             'data' => $developer,
         ], 201);
     }
@@ -110,10 +108,8 @@ class DeveloperController extends Controller
 
         $developer->save();
 
-        if ($request->has('project_ids')) {
-            $project_ids = explode(',', $request->project_ids);
-            $developer->projects()->sync($project_ids);
-        }
+        $project_ids = $request->project_ids ? explode(',', $request->project_ids) : [];
+        $developer->projects()->sync($project_ids);
 
         return response()->json([
             'message' => 'Developer updated successfully',

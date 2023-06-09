@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::table('projects', function ($table) {
             $table->date('start_date')->change();
             $table->date('end_date')->change();
+            $table->text('description')->nullable()->change();
         });
     }
 
@@ -25,6 +26,7 @@ return new class extends Migration
         Schema::table('projects', function ($table) {
             $table->dateTime('start_date')->change();
             $table->dateTime('end_date')->change();
+            $table->string('description')->change();
         });
     }
 };
