@@ -8,6 +8,7 @@
 - Run `php artisan key:generate` to generate the application key
 - Run `php artisan migrate` to run the migrations
 - Run `php artisan db:seed` to seed the database
+- Run `php artisan storage:link` to create a symbolic link from `public/storage` to `storage/app/public`
 - Run `php artisan serve` to start the server (or use Laravel Valet or Laravel Homestead)
 
 ## Admin Credentials
